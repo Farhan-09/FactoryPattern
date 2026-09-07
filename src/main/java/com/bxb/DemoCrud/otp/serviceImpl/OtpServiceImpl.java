@@ -13,19 +13,30 @@ import java.util.concurrent.ThreadLocalRandom;
 public class OtpServiceImpl implements OtpService {
 
     private final StringRedisTemplate stringRedisTemplate;
+
     private final int OTP_EXPIRATION_MINUTES = 5;
 
     private String getKey(String email) {
-        return "otp" + email.toLowerCase();
+        return "otp:" + email.toLowerCase();
+    }
+
+    private String getRegistrationKey(String email) {
+        return "register:" + email.toLowerCase();
     }
 
     @Override
     public String generateAndStoreOpt(String email) {
 
-        String otp = String.format("%06d", ThreadLocalRandom.current().nextInt(0, 1000000));
+        String otp = String.format(
+                "%06d",
+                ThreadLocalRandom.current().nextInt(0, 1000000)
+        );
+
         String key = getKey(email);
 
-        stringRedisTemplate.opsForValue().set(key, otp, Duration.ofMinutes(OTP_EXPIRATION_MINUTES));
+        stringRedisTemplate.opsForValue()
+                .set(key, otp, Duration.ofMinutes(OTP_EXPIRATION_MINUTES));
+
         return otp;
     }
 
@@ -43,5 +54,39 @@ public class OtpServiceImpl implements OtpService {
         }
 
         return false;
+    }
+    @Override
+    public void storeRegistrationData(
+            String email,
+            String name,
+            String password) {
+
+        String key = getRegistrationKey(email);
+
+        String data = name + "|" + password;
+
+        stringRedisTemplate.opsForValue()
+                .set(key, data, Duration.ofMinutes(OTP_EXPIRATION_MINUTES));
+    }
+    @Override
+    public String[] getRegistrationData(String email) {
+
+        String key = getRegistrationKey(email);
+
+        String data =
+                stringRedisTemplate.opsForValue().get(key);
+
+        if (data == null) {
+            return null;
+        }
+
+        return data.split("\\|", 2);
+    }
+    @Override
+    public void deleteRegistrationData(String email) {
+
+        stringRedisTemplate.delete(
+                getRegistrationKey(email)
+        );
     }
 }
