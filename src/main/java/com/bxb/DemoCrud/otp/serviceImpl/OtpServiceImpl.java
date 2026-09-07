@@ -10,39 +10,38 @@ import java.util.concurrent.ThreadLocalRandom;
 
 @Service
 @RequiredArgsConstructor
-
 public class OtpServiceImpl implements OtpService {
 
-    private final StringRedisTemplate redisTemplate;
+    private final StringRedisTemplate stringRedisTemplate;
     private final int OTP_EXPIRATION_MINUTES = 5;
 
     private String getKey(String email) {
-        return "otp:" + email.toLowerCase();
+        return "otp" + email.toLowerCase();
     }
 
     @Override
-    public String generateAndStoreOtp(String email) {
+    public String generateAndStoreOpt(String email) {
+
         String otp = String.format("%06d", ThreadLocalRandom.current().nextInt(0, 1000000));
-
         String key = getKey(email);
 
-        redisTemplate.opsForValue().set(key, otp , Duration.ofMinutes(OTP_EXPIRATION_MINUTES));
-
+        stringRedisTemplate.opsForValue().set(key, otp, Duration.ofMinutes(OTP_EXPIRATION_MINUTES));
         return otp;
-
-
     }
 
     @Override
-    public boolean verifyOtp(String email, String otp) {
+    public boolean verify(String email, String otp) {
+
         String key = getKey(email);
-        String storedOtp = redisTemplate.opsForValue().get(key);
+
+        String storedOtp =
+                stringRedisTemplate.opsForValue().get(key);
 
         if (storedOtp != null && storedOtp.equals(otp)) {
-            redisTemplate.delete(key);
+            stringRedisTemplate.delete(key);
             return true;
         }
-        redisTemplate.delete(key);
+
         return false;
     }
 }

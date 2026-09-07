@@ -5,15 +5,33 @@ import com.bxb.DemoCrud.kafka.service.EmailService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
 public class OtpEmailConsumer {
-    private EmailService emailService;
 
-    @KafkaListener(topics = "otp-email", groupId = "otp-email-group")
-    public void consume(OtpEmailEvent event) {
-        emailService.sendOtpEmail(event.getEmail(), event.getName(), event.getOtp());
+    private final EmailService emailService;
+    private final ObjectMapper objectMapper;
 
+    @KafkaListener(
+            topics = "otp-email",
+            groupId = "otp-email-group"
+    )
+    public void consume(String message) {
+
+        try {
+            OtpEmailEvent event =
+                    objectMapper.readValue(message, OtpEmailEvent.class);
+
+            emailService.sendOtpEmail(
+                    event.getEmail(),
+                    event.getName(),
+                    event.getOtp()
+            );
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to process OTP event", e);
+        }
     }
 }
