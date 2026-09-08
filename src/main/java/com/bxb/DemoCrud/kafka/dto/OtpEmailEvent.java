@@ -1,4 +1,4 @@
-package com.bxb.DemoCrud.kafka.model;
+package com.bxb.DemoCrud.kafka.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,20 +1,12 @@
 package com.bxb.DemoCrud.otp.service;
 
+
+
 public interface OtpService {
 
+        String generateAndStoreOtp(String email);
 
-        String generateAndStoreOpt(String email);
+        boolean isOtpValid(String email, String otp);
 
-        boolean verify(String email, String otp);
-
-        void storeRegistrationData(
-                String email,
-                String name,
-                String password
-        );
-
-        String[] getRegistrationData(String email);
-
-        void deleteRegistrationData(String email);
-    }
-
+        void deleteOtp(String email);
+}
