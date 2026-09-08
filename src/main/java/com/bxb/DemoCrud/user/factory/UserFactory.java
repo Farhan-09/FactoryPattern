@@ -4,6 +4,7 @@ import com.bxb.DemoCrud.user.util.UserRequestType;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
+import org.springframework.web.bind.annotation.CrossOrigin;
 
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
+@CrossOrigin("*")
 public class UserFactory {
 
     private final List<UserOperation> userOperations;

@@ -1,6 +1,7 @@
 package com.bxb.DemoCrud.user.factory.Operations;
 
 import com.bxb.DemoCrud.user.Entity.User;
+import com.bxb.DemoCrud.user.Exception.UserNotFoundException;
 import com.bxb.DemoCrud.user.factory.UserOperation;
 import com.bxb.DemoCrud.user.mapper.UserMapper;
 import com.bxb.DemoCrud.user.repository.UserRepo;
@@ -27,8 +28,9 @@ public class GetUserByIdService implements UserOperation {
 
         User user = userRepository.findById(request.getId())
                 .orElseThrow(() ->
-                        new RuntimeException("User not found"));
-
+                        new UserNotFoundException(
+                                "User with id " + request.getId() + " not found"
+                        ));
         return UserOperationResponse.builder()
                 .user(userMapper.toResponse(user))
                 .message("User fetched successfully")

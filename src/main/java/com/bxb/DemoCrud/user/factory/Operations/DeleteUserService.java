@@ -1,5 +1,6 @@
 package com.bxb.DemoCrud.user.factory.Operations;
 
+import com.bxb.DemoCrud.user.Exception.UserNotFoundException;
 import com.bxb.DemoCrud.user.factory.UserOperation;
 import com.bxb.DemoCrud.user.repository.UserRepo;
 import com.bxb.DemoCrud.user.request.UserRequest;
@@ -23,9 +24,10 @@ public class DeleteUserService implements UserOperation {
     public UserOperationResponse execute(UserRequest request) {
 
         if (!userRepository.existsById(request.getId())) {
-            throw new RuntimeException("User not found");
+            throw new UserNotFoundException(
+                    "User with id " + request.getId() + " not found"
+            );
         }
-
         userRepository.deleteById(request.getId());
 
         return UserOperationResponse.builder()

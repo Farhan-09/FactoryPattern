@@ -33,7 +33,7 @@ public class CreateUserService implements UserOperation {
 
 
         if (userRepository.findByEmail(request.getEmail()).isPresent()) {
-            throw new DulplicateEmailException("User already exists");
+            throw new DulplicateEmailException("User already exists with this email" +  request.getEmail());
         }
         User user = userMapper.toEntity(request);
 
