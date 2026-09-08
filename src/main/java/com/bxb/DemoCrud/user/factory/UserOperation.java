@@ -1,11 +1,14 @@
 package com.bxb.DemoCrud.user.factory;
 
-import com.bxb.DemoCrud.user.request.UserRequestDTO;
-import com.bxb.DemoCrud.user.response.UserResponseDTO;
+import com.bxb.DemoCrud.user.request.UserRequest;
+
+import com.bxb.DemoCrud.user.response.UserOperationResponse;
+import com.bxb.DemoCrud.user.response.UserResponse;
+
 import com.bxb.DemoCrud.user.util.UserRequestType;
 
 public interface UserOperation {
     UserRequestType getRequest();
 
-    UserResponseDTO execute(UserRequestDTO request);
+    UserOperationResponse execute(UserRequest request);
 }

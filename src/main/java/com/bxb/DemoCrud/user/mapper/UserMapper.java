@@ -2,14 +2,16 @@ package com.bxb.DemoCrud.user.mapper;
 
 
 import com.bxb.DemoCrud.user.Entity.User;
-import com.bxb.DemoCrud.user.request.UserRequestDTO;
-import com.bxb.DemoCrud.user.response.UserResponseDTO;
+import com.bxb.DemoCrud.user.request.UserRequest;
+
+import com.bxb.DemoCrud.user.response.UserResponse;
+
 import org.springframework.stereotype.Component;
 
 @Component
 public class UserMapper {
 
-    public User toEntity(UserRequestDTO request) {
+    public User toEntity(UserRequest request) {
 
         User user = new User();
 
@@ -20,18 +22,16 @@ public class UserMapper {
         return user;
     }
 
-    public UserResponseDTO toResponse(User user) {
+    public UserResponse toResponse(User user) {
 
-        return UserResponseDTO.bui
-
-        ldr()
+        return UserResponse.builder()
                 .id(user.getId())
                 .name(user.getName())
                 .email(user.getEmail())
                 .build();
     }
 
-    public void updateEntity(User user, UserRequestDTO request) {
+    public void updateEntity(User user, UserRequest request) {
 
         user.setName(request.getName());
         user.setEmail(request.getEmail());

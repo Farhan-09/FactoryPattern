@@ -1,27 +1,28 @@
 package com.bxb.DemoCrud.user.controller;
 
-import com.bxb.DemoCrud.user.Entity.User;
-import com.bxb.DemoCrud.user.request.UserRequestDTO;
-import com.bxb.DemoCrud.user.service.UserService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.bxb.DemoCrud.user.factory.UserFactory;
+import com.bxb.DemoCrud.user.request.UserRequest;
 
-@Controller
-@RequiredArgsConstructor
+import com.bxb.DemoCrud.user.response.UserOperationResponse;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
 @RestController
-@RequestMapping("/user")
+@RequestMapping("/users")
+@RequiredArgsConstructor
 public class UserController {
 
-    final UserService userService;
+    private final UserFactory userFactory;
 
+    @PostMapping
+    public ResponseEntity<UserOperationResponse> handle(
+            @RequestBody final UserRequest request) {
 
-    @PostMapping("/create")
-    public User createUser(@RequestBody UserRequestDTO requestDTO){
+        UserOperationResponse response = userFactory
+                .getOperation(request.getRequestType())
+                .execute(request);
 
-        return userService.createUser(requestDTO);
+        return ResponseEntity.ok(response);
     }
 }
