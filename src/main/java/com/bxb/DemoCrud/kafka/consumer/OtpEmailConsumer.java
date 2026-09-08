@@ -20,9 +20,13 @@ public class OtpEmailConsumer {
     )
     public void consume(String message) {
 
+        System.out.println(" KAFKA MESSAGE RECEIVED: " + message);
+
         try {
             OtpEmailEvent event =
                     objectMapper.readValue(message, OtpEmailEvent.class);
+
+            System.out.println("Sending email to: " + event.getEmail());
 
             emailService.sendOtpEmail(
                     event.getEmail(),
@@ -30,7 +34,10 @@ public class OtpEmailConsumer {
                     event.getOtp()
             );
 
+            System.out.println(" EMAIL SENT: " + event.getEmail());
+
         } catch (Exception e) {
+            e.printStackTrace();
             throw new RuntimeException("Failed to process OTP event", e);
         }
     }
