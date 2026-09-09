@@ -2,9 +2,10 @@ package com.bxb.DemoCrud.otp.controller;
 
 
 import com.bxb.DemoCrud.kafka.producer.OtpKafkaProducer;
-import com.bxb.DemoCrud.otp.request.SendOtpRequest;
-import com.bxb.DemoCrud.otp.request.VerifyOtpRequest;
+import com.bxb.DemoCrud.otp.request.RegisterRequest;
 import com.bxb.DemoCrud.otp.service.OtpService;
+import com.bxb.DemoCrud.user.Entity.User;
+import com.bxb.DemoCrud.user.repository.UserRepo;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,38 +18,83 @@ public class OtpController {
 
     private final OtpService otpService;
     private final OtpKafkaProducer otpKafkaProducer;
+    private final UserRepo userRepo;
 
     @PostMapping("/send")
     public ResponseEntity<String> sendOtp(
-            @Valid @RequestBody SendOtpRequest request) {
+            @Valid @RequestBody RegisterRequest request) {
 
-        String otp = otpService.generateAndStoreOpt(
-                request.getEmail()
+        String email = request.getEmail()
+                .trim()
+                .toLowerCase();
+
+        if (userRepo.existsByEmail(email)) {
+            return ResponseEntity.badRequest()
+                    .body("Email is already registered");
+        }
+
+        String otp = otpService.generateAndStoreOtp(
+                email,
+                request.getName(),
+                request.getPassword()
         );
 
         otpKafkaProducer.sendOtpEmail(
-                request.getEmail(),
+                email,
                 request.getName(),
                 otp
         );
 
-        return ResponseEntity.ok("OTP sent successfully");
+        return ResponseEntity.ok(
+                "OTP sent successfully"
+        );
     }
+
 
     @PostMapping("/verify")
     public ResponseEntity<String> verifyOtp(
-            @RequestBody VerifyOtpRequest request) {
+            @RequestParam String email,
+            @RequestParam String otp) {
 
-        boolean verified = otpService.verify(
-                request.getEmail(),
-                request.getOtp()
-        );
+        String normalizedEmail =
+                email.trim().toLowerCase();
 
-        if (verified) {
-            return ResponseEntity.ok("OTP verified successfully");
+        if (!otpService.isOtpValid(
+                normalizedEmail,
+                otp)) {
+
+            return ResponseEntity.badRequest()
+                    .body("Invalid or expired OTP");
         }
 
-        return ResponseEntity.badRequest()
-                .body("Invalid or expired OTP");
+        String userData =
+                otpService.getRegistrationData(
+                        normalizedEmail
+                );
+
+        if (userData == null) {
+            return ResponseEntity.badRequest()
+                    .body("Registration data expired");
+        }
+
+        String[] data = userData.split("\\|", 2);
+
+        User user = new User();
+
+        user.setName(data[0]);
+        user.setEmail(normalizedEmail);
+        user.setPassword(data[1]);
+
+        userRepo.save(user);
+
+        otpService.deleteOtp(normalizedEmail);
+
+        otpService.deleteRegistrationData(
+                normalizedEmail
+        );
+
+        return ResponseEntity.ok(
+                "OTP verified and user created successfully"
+        );
     }
 }

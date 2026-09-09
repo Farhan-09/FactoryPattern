@@ -1,4 +1,4 @@
-package com.bxb.DemoCrud.kafka.model;
+package com.bxb.DemoCrud.kafka.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -10,7 +10,6 @@ import lombok.Setter;
 @RequiredArgsConstructor
 @AllArgsConstructor
 public class OtpEmailEvent {
-
     private String email;
     private String name;
     private String otp;

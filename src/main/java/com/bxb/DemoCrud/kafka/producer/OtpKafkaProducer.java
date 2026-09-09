@@ -1,10 +1,12 @@
 package com.bxb.DemoCrud.kafka.producer;
 
-import com.bxb.DemoCrud.kafka.model.OtpEmailEvent;
+
+import com.bxb.DemoCrud.kafka.dto.OtpEmailEvent;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
+
+import java.util.concurrent.CompletableFuture;
 
 @Service
 @RequiredArgsConstructor
@@ -12,21 +14,15 @@ public class OtpKafkaProducer {
 
     private static final String TOPIC = "otp-email";
 
-    private final KafkaTemplate<String, String> kafkaTemplate;
-    private final ObjectMapper objectMapper;
+    private final KafkaTemplate<String, OtpEmailEvent> kafkaTemplate;
 
-    public void sendOtpEmail(String email, String name, String otp) {
+    public CompletableFuture<Void> sendOtpEmail(String email, String name, String otp) {
 
-        OtpEmailEvent event =
-                new OtpEmailEvent(email, name, otp);
+        OtpEmailEvent event = new OtpEmailEvent(email, name, otp);
 
-        try {
-            String json = objectMapper.writeValueAsString(event);
-
-            kafkaTemplate.send(TOPIC, email, json);
-
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to convert OTP event to JSON", e);
-        }
+        return kafkaTemplate.send(TOPIC, event).thenAccept(result -> {}).exceptionally(ex -> {
+                    throw new RuntimeException("Failed to send OTP email event to Kafka", ex
+                    );
+                });
     }
 }

@@ -1,45 +1,37 @@
 package com.bxb.DemoCrud.user.factory;
 
-import com.bxb.DemoCrud.user.Entity.User;
-//import com.bxb.DemoCrud.user.UserOperation;
-import com.bxb.DemoCrud.user.factory.Operations.*;
-import com.bxb.DemoCrud.user.request.UserRequestDTO;
+import com.bxb.DemoCrud.user.util.UserRequestType;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-//import static com.bxb.DemoCrud.user.UserOperation.*;
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
+@RequiredArgsConstructor
 public class UserFactory {
 
-    private final CreateUserOperation createUserOperation;
-    private final GetUserOperation getUserOperation;
-    private final UpdateUserOperation updateUserOperation;
-    private final DeleteUserOperation deleteUserOperation;
+    private final List<UserOperation> userOperations;
 
-    public UserFactory(
-            CreateUserOperation createUserOperation,
-            GetUserOperation getUserOperation,
-            UpdateUserOperation updateUserOperation,
-            DeleteUserOperation deleteUserOperation) {
+    private final Map<UserRequestType, UserOperation> operationMap =
+            new HashMap<>();
 
-        this.createUserOperation = createUserOperation;
-        this.getUserOperation = getUserOperation;
-        this.updateUserOperation = updateUserOperation;
-        this.deleteUserOperation = deleteUserOperation;
+    @PostConstruct
+    void init() {
+
+        userOperations.forEach(operation ->
+                operationMap.put(
+                        operation.getRequest(),
+                        operation
+                )
+        );
     }
 
-    public UserOperation getOperation(UserRequestType requestType) {
+    public UserOperation getOperation(
+            final UserRequestType requestType) {
 
-        return switch (requestType) {
-
-            case CREATE -> createUserOperation;
-
-            case GET -> getUserOperation;
-
-            case UPDATE -> updateUserOperation;
-
-            case DELETE -> deleteUserOperation;
-        };
+        return operationMap.get(requestType);
     }
 }

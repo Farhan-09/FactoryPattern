@@ -1,44 +1,34 @@
 package com.bxb.DemoCrud.kafka.consumer;
 
-import com.bxb.DemoCrud.kafka.model.OtpEmailEvent;
+
+import com.bxb.DemoCrud.kafka.dto.OtpEmailEvent;
 import com.bxb.DemoCrud.kafka.service.EmailService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.ObjectMapper;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class OtpEmailConsumer {
 
     private final EmailService emailService;
-    private final ObjectMapper objectMapper;
 
-    @KafkaListener(
-            topics = "otp-email",
-            groupId = "otp-email-group"
-    )
-    public void consume(String message) {
+    @KafkaListener(topics = "otp-email", groupId = "otp-email-group")
 
-        System.out.println(" KAFKA MESSAGE RECEIVED: " + message);
+    public void consume(OtpEmailEvent emailEvent) {
 
         try {
-            OtpEmailEvent event =
-                    objectMapper.readValue(message, OtpEmailEvent.class);
+            emailService.sendOtpEmail(emailEvent.getEmail(), emailEvent.getName(), emailEvent.getOtp());
 
-            System.out.println("Sending email to: " + event.getEmail());
-
-            emailService.sendOtpEmail(
-                    event.getEmail(),
-                    event.getName(),
-                    event.getOtp()
-            );
-
-            System.out.println(" EMAIL SENT: " + event.getEmail());
+            log.info("OTP email sent successfully to {}", emailEvent.getEmail());
 
         } catch (Exception e) {
-            e.printStackTrace();
-            throw new RuntimeException("Failed to process OTP event", e);
+
+            log.error("Failed to send OTP email to {}", emailEvent.getEmail(), e);
+
+            throw e;
         }
     }
 }
