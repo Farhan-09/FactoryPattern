@@ -30,79 +30,53 @@ public class OtpServiceImpl implements OtpService {
     }
 
     @Override
-    public String generateAndStoreOtp(
-            String email,
-            String name,
-            String password) {
+    public String generateAndStoreOtp(String email, String name, String password) {
 
-        String normalizedEmail =
-                email.trim().toLowerCase();
+        String normalizedEmail = email.trim().toLowerCase();
 
         // Generate OTP
-        String otp = String.format(
-                "%06d",
-                ThreadLocalRandom.current()
-                        .nextInt(1_000_000)
+        String otp = String.format("%06d", ThreadLocalRandom.current().nextInt(1_000_000)
         );
 
         // Store OTP for 5 minutes
-        stringRedisTemplate.opsForValue().set(
-                getOtpKey(normalizedEmail),
-                otp,
-                Duration.ofMinutes(OTP_EXPIRATION_MINUTES)
+        stringRedisTemplate.opsForValue().set(getOtpKey(normalizedEmail), otp, Duration.ofMinutes(OTP_EXPIRATION_MINUTES)
         );
 
         // Store temporary registration data
         String userData = name + "|" + password;
 
-        stringRedisTemplate.opsForValue().set(
-                getRegisterKey(normalizedEmail),
-                userData,
-                Duration.ofMinutes(OTP_EXPIRATION_MINUTES)
-        );
+        stringRedisTemplate.opsForValue().set(getRegisterKey(normalizedEmail), userData, Duration.ofMinutes(OTP_EXPIRATION_MINUTES));
 
         return otp;
     }
 
     @Override
-    public boolean isOtpValid(
-            String email,
-            String otp) {
+    public boolean isOtpValid(String email, String otp) {
 
         if (otp == null || otp.isBlank()) {
             return false;
         }
 
-        String storedOtp =
-                stringRedisTemplate.opsForValue()
-                        .get(getOtpKey(email));
+        String storedOtp = stringRedisTemplate.opsForValue().get(getOtpKey(email));
 
-        return storedOtp != null
-                && storedOtp.equals(otp.trim());
+        return storedOtp != null && storedOtp.equals(otp.trim());
     }
 
     @Override
     public void deleteOtp(String email) {
 
-        stringRedisTemplate.delete(
-                getOtpKey(email)
-        );
+        stringRedisTemplate.delete(getOtpKey(email));
     }
 
     @Override
-    public String getRegistrationData(
-            String email) {
+    public String getRegistrationData(String email) {
 
-        return stringRedisTemplate.opsForValue()
-                .get(getRegisterKey(email));
+        return stringRedisTemplate.opsForValue().get(getRegisterKey(email));
     }
 
     @Override
-    public void deleteRegistrationData(
-            String email) {
+    public void deleteRegistrationData(String email) {
 
-        stringRedisTemplate.delete(
-                getRegisterKey(email)
-        );
+        stringRedisTemplate.delete(getRegisterKey(email));
     }
 }

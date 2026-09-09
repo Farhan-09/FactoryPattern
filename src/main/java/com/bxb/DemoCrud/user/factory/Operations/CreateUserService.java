@@ -27,30 +27,18 @@ public class CreateUserService implements UserOperation {
     @Override
     public UserOperationResponse execute(UserRequest request) {
 
-        String email = request.getEmail()
-                .trim()
-                .toLowerCase();
+        String email = request.getEmail().trim().toLowerCase();
 
-        // Check if user already exists
+
         if (userRepository.findByEmail(email).isPresent()) {
-            throw new DulplicateEmailException(
-                    "User already exists"
-            );
+            throw new DulplicateEmailException("User already exists");
         }
 
-        // Generate OTP and store OTP + user data in Redis
-        String otp = otpService.generateAndStoreOtp(
-                email,
-                request.getName(),
-                request.getPassword()
-        );
+        // generate OTP nd store OTP nd user data in Redis
+        String otp = otpService.generateAndStoreOtp(email, request.getName(), request.getPassword());
 
-        // Send OTP through Kafka
-        otpKafkaProducer.sendOtpEmail(
-                email,
-                request.getName(),
-                otp
-        );
+        // send OTP through Kafkaa
+        otpKafkaProducer.sendOtpEmail(email, request.getName(), otp);
 
         return UserOperationResponse.builder()
                 .message("OTP sent successfully")

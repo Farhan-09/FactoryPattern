@@ -21,8 +21,7 @@ public class UserFactory {
     @PostConstruct
     void init() {
 
-        userOperations.forEach(operation ->
-                operationMap.put(
+        userOperations.forEach(operation -> operationMap.put(
                         operation.getRequest(),
                         operation
                 )

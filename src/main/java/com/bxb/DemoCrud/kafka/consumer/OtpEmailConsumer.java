@@ -22,7 +22,7 @@ public class OtpEmailConsumer {
         try {
             emailService.sendOtpEmail(emailEvent.getEmail(), emailEvent.getName(), emailEvent.getOtp());
 
-            log.info("OTP email sent successfully to {}", emailEvent.getEmail());
+            log.info("OTP sent successfully to {}", emailEvent.getEmail());
 
         } catch (Exception e) {
 

@@ -4,8 +4,7 @@ package com.bxb.DemoCrud.otp.service;
 public interface OtpService {
 
         String generateAndStoreOtp(
-                String email,
-                String name,
+                String email, String name,
                 String password
         );
 
